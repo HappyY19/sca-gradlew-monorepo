@@ -1,5 +1,5 @@
 import os
-
+import click
 
 def load_properties(filepath, sep='=', comment_char='#'):
     """
@@ -56,9 +56,9 @@ def create_new_gradlew(file_path):
 """)
 
 
-if __name__ == '__main__':
-
-    path = "/home/happy/Documents/SourceCode/github/gradle-monorepo-example"
+@click.command()
+@click.argument('path')
+def main(path):
     for (root, dirs, files) in os.walk(path):
         if 'gradlew' not in files:
             continue
@@ -71,3 +71,7 @@ if __name__ == '__main__':
         print(f"root: {root}")
         print(f"dirs: {dirs}")
         print(f"files: {files}")
+
+
+if __name__ == '__main__':
+    main()
