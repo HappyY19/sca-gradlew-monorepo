@@ -1,5 +1,7 @@
 import os
+import stat
 import click
+
 
 def load_properties(filepath, sep='=', comment_char='#'):
     """
@@ -34,6 +36,7 @@ def rename_gradlew_to_gradlew_origin(file_path):
     src_file = file_path
     dest_file = file_path.replace("/gradlew", "/gradlew-origin")
     os.rename(src_file, dest_file)
+    make_file_executable(dest_file)
 
 
 def create_new_gradlew(file_path):
@@ -42,18 +45,21 @@ def create_new_gradlew(file_path):
   echo $@
   i=1
   arg_str=""
-  
-  for arg in "$@"
-  do
-      if [ $arg != "--no-parallel"]
-      then 
-          arg_str="$arg_str $arg"
-      fi
-      i = $((i + 1));
+
+  for arg in "$@"; do
+    if [ $arg != "--no-parallel" ]; then
+      arg_str="$arg_str $arg"
+    fi
+    i=$((i + 1))
   done
-  echo workaround - call original gradlew with aruguments: $arg_str
+  echo workaround - call original gradlew with arguments: $arg_str
   bash gradlew-origin $arg_str
 """)
+
+
+def make_file_executable(file_path):
+    st = os.stat(file_path)
+    os.chmod(file_path, st.st_mode | stat.S_IEXEC)
 
 
 @click.command()
@@ -68,6 +74,7 @@ def main(path):
         if gradle_version <= 430:
             rename_gradlew_to_gradlew_origin(gradlew_file_path)
             create_new_gradlew(gradlew_file_path)
+            make_file_executable(gradlew_file_path)
         print(f"root: {root}")
         print(f"dirs: {dirs}")
         print(f"files: {files}")
